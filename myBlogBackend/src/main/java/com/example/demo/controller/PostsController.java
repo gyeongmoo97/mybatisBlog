@@ -3,29 +3,40 @@ package com.example.demo.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.domain.Post;
-import com.example.demo.dto.PostDto;
 import com.example.demo.service.PostService;
 
 
-@RestController
-@RequestMapping("/posts")
+@RestController //컨트롤러가 HTTP 요청을 처리하고, 자바 객체를 HTTP 응답 본문으로 직접 반환하도록 합니다.
+/*
+ * 1. 기본적인 컨트롤러의 기능 - HTTP 요청을 받아들이는 엔드포인트(endpoints)로 사용
+ * 2. 자동 역직렬화(Request Body -> Java Object): 클라이언트로부터 오는 JSON 형식의 HTTP 요청 본문을 자바 객체로 자동으로 변환합니다. 
+ * 3. 자동 직렬화(Java Object -> Response Body): 자바 객체를 JSON 형식의 HTTP 응답 본문으로 자동 변환하여 클라이언트에게 보냅니다. 
+ * */
+@RequestMapping("/posts") // 컨트롤러의 URI 구성
 public class PostsController {
 
-	@Autowired
+	@Autowired 	//의존성 주입
     private PostService postsService;
 
     // 게시물 생성 (POST)
-    @PostMapping
+    @PostMapping // http method 설정
     public ResponseEntity<Post> createPost(@RequestBody Post post) {
         	postsService.createPost(post);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     // 게시물 조회 (GET)
-    @GetMapping("/{postId}")
+    @GetMapping("/{postId}") //같은 경로를 사용하더라도 http mathod로 오버로딩 가능
     public ResponseEntity<Post> getPost(@PathVariable(name="postId") Long postId) {
         Post post = postsService.getPostById(postId);
        

@@ -5,15 +5,15 @@ plugins {
 }
 
 compileJava {
-    options.compilerArgs << '-parameters'
+    options.compilerArgs.add('-parameters')
 }
 
 group = 'com.example'
 version = '0.0.1-SNAPSHOT'
 
-java {
-	sourceCompatibility = '21'
-}
+//java {
+//	sourceCompatibility = '21'
+//}
 
 configurations {
 	compileOnly {
@@ -47,3 +47,4 @@ dependencies {
 tasks.withType(Test) {
     enabled = false
 }
+

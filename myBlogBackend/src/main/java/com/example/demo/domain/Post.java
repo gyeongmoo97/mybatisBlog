@@ -9,11 +9,12 @@ import lombok.ToString;
 
 import java.sql.Timestamp;
 
-@AllArgsConstructor
-@Getter
-@Setter
-@NoArgsConstructor
-@ToString
+@Data
+//@AllArgsConstructor
+//@Getter
+//@Setter
+//@NoArgsConstructor
+//@ToString
 public class Post {
     private int postId;
     private int userId;

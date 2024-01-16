@@ -1,0 +1,24 @@
+<!-- PostMapper.xml -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.mapper.PostMapper">
+    <select id="getPostById" parameterType="Long" resultType="com.example.demo.domain.Post">
+        SELECT * FROM posts WHERE post_id = #{postId}
+    </select>
+
+    <select id="getAllPosts" resultType="com.example.demo.domain.Post">
+        SELECT * FROM posts
+    </select>
+
+    <insert id="createPost" parameterType="com.example.demo.domain.Post">
+        INSERT INTO posts (post_id, user_id, title, content, status, view_count) VALUES (#{postId},#{userId},#{title}, #{content}, #{status} , #{viewCount})
+    </insert>
+
+    <update id="updatePost" parameterType="com.example.demo.domain.Post">
+        UPDATE posts SET title = #{title}, content = #{content} WHERE post_id = #{postId}
+    </update>
+
+    <delete id="deletePost" parameterType="Long">
+        DELETE FROM posts WHERE post_id = #{postId}
+    </delete>
+</mapper>

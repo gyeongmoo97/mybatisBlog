@@ -52,6 +52,7 @@ public class PostService {
     	commentMapper.deleteCommentsByPost(postId);
     	postCategoriesMapper.deletePostCategoriesByPost(postId);
         return postMapper.deletePost(postId);
+
     }
 }
 

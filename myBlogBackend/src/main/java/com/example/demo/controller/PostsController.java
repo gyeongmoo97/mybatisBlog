@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.demo.domain.Post;
 import com.example.demo.service.PostService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+
 
 @RestController //컨트롤러가 HTTP 요청을 처리하고, 자바 객체를 HTTP 응답 본문으로 직접 반환하도록 합니다.
 /*
@@ -28,14 +31,19 @@ public class PostsController {
 	@Autowired 	//의존성 주입
     private PostService postsService;
 
-    // 게시물 생성 (POST)
+	 // 게시물 생성 (POST)
+    @Operation(summary = "새로운 게시물 생성", description = "새로운 게시물을 생성합니다.")
+    @ApiResponse(responseCode = "201", description = "게시물 생성 성공")
     @PostMapping // http method 설정
     public ResponseEntity<Post> createPost(@RequestBody Post post) {
         	postsService.createPost(post);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    // 게시물 조회 (GET)
+	// 게시물 조회 (GET)
+    @Operation(summary = "게시물 조회", description = "특정 ID를 가진 게시물을 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "게시물 조회 성공")
+    @ApiResponse(responseCode = "404", description = "게시물을 찾을 수 없음")
     @GetMapping("/{postId}") //같은 경로를 사용하더라도 http mathod로 오버로딩 가능
     public ResponseEntity<Post> getPost(@PathVariable(name="postId") Long postId) {
         Post post = postsService.getPostById(postId);
@@ -48,6 +56,9 @@ public class PostsController {
     }
 
     // 게시물 수정 (PUT)
+    @Operation(summary = "게시물 수정", description = "특정 ID를 가진 게시물을 수정합니다.")
+    @ApiResponse(responseCode = "200", description = "게시물 수정 성공")
+    @ApiResponse(responseCode = "404", description = "수정할 게시물을 찾을 수 없음")
     @PutMapping("/{postId}")
     public ResponseEntity<Post> updatePost(@PathVariable(name="postId") Long postId, @RequestBody Post updatedPost) {
         int postUpdateCount = postsService.updatePost(postId, updatedPost);
@@ -59,6 +70,9 @@ public class PostsController {
     }
 
     // 게시물 삭제 (DELETE)
+    @Operation(summary = "게시물 삭제", description = "특정 ID를 가진 게시물을 삭제합니다.")
+    @ApiResponse(responseCode = "204", description = "게시물 삭제 성공")
+    @ApiResponse(responseCode = "404", description = "삭제할 게시물을 찾을 수 없음")
     @DeleteMapping("/{postId}")
     public ResponseEntity<Void> deletePost(@PathVariable(name="postId") Long postId) {
         int postDeleteCount= postsService.deletePost(postId);

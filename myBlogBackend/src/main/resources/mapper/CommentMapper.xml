@@ -6,4 +6,11 @@
 	<delete id="deleteCommentsByPost" parameterType="Long">
         DELETE FROM comments WHERE post_id = #{postId}
     </delete>
+    
+    <!-- 특정 게시물에 대한 모든 댓글 조회 -->
+    <select id="findCommentsByPost" resultType="com.example.demo.domain.comment.Comment">
+        SELECT *
+        FROM Comments
+        WHERE post_id = #{postId}
+    </select>
 </mapper>

@@ -1,0 +1,16 @@
+<!-- PostMapper.xml -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.mapper.CategoryMapper">
+
+    <!-- 특정 카테고리의 게시물 중 가장 많이 조회된 게시물 조회 -->
+    <select id="findTopViewedPostByCategory" resultType="com.example.demo.dto.post.PostViewCount">
+        SELECT p.title, p.view_count
+        FROM Posts p
+        INNER JOIN PostCategories pc ON p.post_id = pc.post_id
+        WHERE pc.category_id = #{categoryId}
+        ORDER BY p.view_count DESC
+        LIMIT 1
+    </select>
+
+</mapper>

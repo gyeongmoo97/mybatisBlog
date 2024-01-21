@@ -1,4 +1,4 @@
-package com.example.demo.domain;
+package com.example.demo.domain.post;
 
 import java.sql.Timestamp;
 
@@ -37,4 +37,7 @@ public class Post {
 
     @Schema(description = "수정 시간", example = "2023-01-02T12:00:00")
     private Timestamp updatedAt;
+    
+    @Schema(description = "카테고리 명", example = "고양이")
+    private String categoryName;
 }

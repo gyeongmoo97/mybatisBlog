@@ -1,0 +1,30 @@
+<!-- PostMapper.xml -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.mapper.UserMapper">
+
+    <!-- 각 사용자별 게시물 수 조회 -->
+    <select id="findUserPostCounts" resultType="com.example.demo.dto.user.UserPostCount">
+        SELECT user_id, COUNT(*) as postCount
+        FROM Posts
+        GROUP BY user_id
+    </select>
+    
+    <!-- 다수의 사용자 조회 -->
+    <select id="findUsers" resultType="com.example.demo.domain.user.UserProfile">
+        SELECT *
+        FROM UserProfile
+        <if test="sort != null and !sort.isEmpty()">
+            ORDER BY
+            <foreach item="s" collection="sort" separator=",">
+                ${s} ${order[sort.indexOf(s)]}
+            </foreach>
+        </if>
+        <if test="page != null">
+            LIMIT #{page}
+        </if>
+        <if test="offset != null">
+            OFFSET #{offset}
+        </if>
+    </select>
+</mapper>

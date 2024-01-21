@@ -2,23 +2,91 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.example.demo.mapper.PostMapper">
-    <select id="getPostById" parameterType="Long" resultType="com.example.demo.domain.Post">
+    <select id="getPostById" parameterType="Long" resultType="com.example.demo.domain.post.Post">
         SELECT * FROM posts WHERE post_id = #{postId}
     </select>
 
-    <select id="getAllPosts" resultType="com.example.demo.domain.Post">
+    <select id="getAllPosts" resultType="com.example.demo.domain.post.Post">
         SELECT * FROM posts
     </select>
 
-    <insert id="createPost" parameterType="com.example.demo.domain.Post">
+    <insert id="createPost" parameterType="com.example.demo.domain.post.Post">
         INSERT INTO posts (post_id, user_id, title, content, status, view_count) VALUES (#{postId},#{userId},#{title}, #{content}, #{status} , #{viewCount})
     </insert>
 
-    <update id="updatePost" parameterType="com.example.demo.domain.Post">
+    <update id="updatePost" parameterType="com.example.demo.domain.post.Post">
         UPDATE posts SET title = #{title}, content = #{content} WHERE post_id = #{postId}
     </update>
 
     <delete id="deletePost" parameterType="Long">
         DELETE FROM posts WHERE post_id = #{postId}
     </delete>
+    
+    <!-- 공개된 모든 게시물 조회 -->
+    <select id="findAllPublicPosts" resultType="com.example.demo.domain.post.Post">
+        SELECT * 
+        FROM Posts 
+        WHERE status = 'public'
+    </select>
+    
+    <!-- 가장 많이 조회된 상위 5개 게시물 조회 -->
+    <select id="findTop5Posts" resultType="com.example.demo.domain.post.Post">
+        SELECT *
+        FROM Posts
+        ORDER BY view_count DESC
+        LIMIT 5
+    </select>
+    
+    <!-- 특정 카테고리에 속하는 게시물과 카테고리 이름 조회 -->
+    <select id="findPostsByCategory" resultType="com.example.demo.domain.post.Post">
+        SELECT p.*, c.name AS category_name
+        FROM Posts p
+        INNER JOIN PostCategories pc ON p.post_id = pc.post_id
+        INNER JOIN Categories c ON pc.category_id = c.category_id
+        WHERE pc.category_id = #{categoryId}
+    </select>
+    
+    <!-- 특정 사용자의 최근 게시물 조회 -->
+    <select id="findRecentPostsByUser" resultType="com.example.demo.domain.post.Post">
+        SELECT *
+        FROM Posts
+        WHERE user_id = #{userId}
+        ORDER BY created_at DESC
+        LIMIT 3
+    </select>
+    
+    <!-- 각 게시물별 댓글 수 조회 -->
+    <select id="findPostCommentCounts" resultType="com.example.demo.dto.post.PostCommentCount">
+        SELECT p.post_id, COUNT(c.comment_id) as commentCount
+        FROM Posts p
+        LEFT JOIN Comments c ON p.post_id = c.post_id
+        GROUP BY p.post_id
+    </select>
+    
+    
+    <!-- 한 달 내 작성된 게시물 조회 -->
+    <select id="findPostsFromLastMonth" resultType="com.example.demo.domain.post.Post">
+        SELECT title, created_at
+        FROM Posts
+        WHERE created_at >= NOW() - INTERVAL '1 MONTH'
+    </select>
+    
+    <!-- 다수의 게시물 조회 -->
+    <select id="findPosts" resultType="com.example.demo.domain.post.Post">
+        SELECT *
+        FROM Posts
+        <if test="sort != null and !sort.isEmpty()">
+            ORDER BY
+            <foreach item="s" collection="sort" separator=",">
+                ${s} ${order[sort.indexOf(s)]}
+            </foreach>
+        </if>
+        <if test="page != null">
+            LIMIT #{page}
+        </if>
+        <if test="offset != null">
+            OFFSET #{offset}
+        </if>
+    </select>
+
 </mapper>

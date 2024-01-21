@@ -2,12 +2,16 @@ package com.example.demo.domain;
 
 import java.sql.Timestamp;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Post {
 
     @Schema(description = "게시물 ID", example = "1", required = true)

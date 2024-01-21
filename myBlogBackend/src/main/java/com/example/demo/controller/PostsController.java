@@ -63,9 +63,11 @@ public class PostsController {
     public ResponseEntity<Post> updatePost(@PathVariable(name="postId") Long postId, @RequestBody Post updatedPost) {
         int postUpdateCount = postsService.updatePost(postId, updatedPost);
         if (postUpdateCount <= 0) {
-            return new ResponseEntity<>(HttpStatus.OK);
+        	System.out.println("0개이하");
+        	return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        	System.out.println("0개이상");
+        	return new ResponseEntity<>(HttpStatus.OK);
         }
     }
 

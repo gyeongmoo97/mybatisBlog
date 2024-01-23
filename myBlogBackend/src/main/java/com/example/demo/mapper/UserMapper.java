@@ -23,4 +23,5 @@ public interface UserMapper {
     // 다수의 사용자 조회
     List<UserProfile> findUsers(UserQueryParams queryParams);
 
+    int deleteUser( Long userId);
 }

@@ -80,7 +80,7 @@ public class UserController {
                     examples = @ExampleObject(
                         name = "Example",
                         value = "{\n" +
-                                "  \"sort\": [\"userId\", \"createdAt\"],\n" +
+                                "  \"sort\": [\"user_id\", \"bio\"],\n" +
                                 "  \"order\": [\"asc\", \"desc\"],\n" +
                                 "  \"page\": 10,\n" +
                                 "  \"offset\": 3\n" +
@@ -89,7 +89,21 @@ public class UserController {
                 )
             ) @RequestBody UserQueryParams queryParams) {
         List<UserProfile> users = userService.getUsers(queryParams);
+        System.out.println(queryParams.toString());
+        System.out.println("=========");
         return new ResponseEntity<>(users, HttpStatus.OK);
+    
+    }
+    
+    // 특정 사용자 삭제
+    @Operation(summary = "1. 사용자 삭제", description = "특정 사용자를 삭제합니다. 관련된 모든 데이터가 순차적으로 삭제됩니다.")
+    @ApiResponse(responseCode = "200", description = "사용자 삭제 성공")
+    @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음")
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<Void> deleteUser(@PathVariable(name="userId") Long userId) {
+        boolean deleted = userService.deleteUser(userId);
+        return deleted ? new ResponseEntity<>(HttpStatus.OK) 
+                       : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 	
 

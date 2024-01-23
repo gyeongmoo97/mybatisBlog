@@ -1,5 +1,6 @@
 package com.example.demo.mapper;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
@@ -49,5 +50,31 @@ public interface PostMapper {
 
     // 다수의 게시물 조회
     List<Post> findPosts(PostQueryParams queryParams);
+
+    // 특정 게시물의 조회수 증가
+    int incrementViewCount(Long postId);
+
+    void changeCategoryForDrafts();
+
+    // 사용자와 관련된 게시물 삭제
+    void deletePostsByUserId( Long userId);
+
+    // 사용자와 관련된 게시물 카테고리 삭제
+    void deletePostCategoriesByUserId( Long userId);
+
+    // 해당 상태의 게시물 삭제
+    void deletePostsByStatus( String status);
+
+    // 먼저 "postcategories" 테이블에서 참조를 삭제
+    void deletePostCategoriesByStatus( String status);
+
+    //다수의 게시물 삭제
+    void deleteMultiplePosts( List<Integer> postIds);
+
+    // 조회수가 낮은 게시물 삭제
+    List<Integer> findPostIdsWithViewsLessThan(int viewThreshold);
+
+    //특정 날짜 이전에 작성된 게시물 조회
+    List<Integer> findPostIdsBeforeDate(LocalDate date);
 
 }

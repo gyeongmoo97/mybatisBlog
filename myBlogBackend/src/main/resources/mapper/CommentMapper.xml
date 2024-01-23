@@ -13,4 +13,64 @@
         FROM Comments
         WHERE post_id = #{postId}
     </select>
+    
+    <!-- 사용자와 관련된 모든 댓글 삭제 -->
+    <delete id="deleteAllRelatedCommentsByUserId">
+        DELETE FROM Comments
+        WHERE user_id = #{userId}
+           OR parent_comment_id IN (SELECT comment_id FROM Comments WHERE user_id = #{userId})
+    </delete>
+    
+    <!-- 특정 카테고리에 속한 게시물에 대한 댓글 삭제 -->
+    <delete id="deleteCommentsByCategoryId">
+        DELETE FROM Comments
+        WHERE post_id IN (SELECT post_id FROM PostCategories WHERE category_id = #{categoryId})
+    </delete>
+    
+    
+    <!-- 특정 기간 이전에 작성된 모든 댓글 삭제 -->
+    <delete id="deleteCommentsBeforeDate">
+        <![CDATA[
+        DELETE FROM Comments WHERE created_at < #{thresholdDate}
+        ]]>
+    </delete>
+    
+    <!-- 해당 상태의 게시물에 대한 댓글 삭제 -->
+    <delete id="deleteCommentsByPostStatus">
+        DELETE FROM Comments WHERE post_id IN (SELECT post_id FROM Posts WHERE status = #{status})
+    </delete>
+    
+    <!-- 특정 사용자가 작성한 댓글 삭제 -->
+    <delete id="deleteCommentsWithoutChildrenOrSameAuthor">
+        DELETE FROM Comments
+        WHERE user_id = #{userId}
+          AND comment_id NOT IN (
+            SELECT parent_comment_id
+            FROM Comments
+            WHERE parent_comment_id IS NOT NULL AND user_id != #{userId}
+          )
+    </delete>
+    
+    <!-- 특정 사용자가 작성한 댓글 중 대댓글 작성자가 다른 경우가 있는지 확인 -->
+    <select id="hasCommentsWithDifferentAuthorChildren" resultType="boolean">
+        SELECT EXISTS (
+            SELECT 1
+            FROM Comments parent
+            JOIN Comments child ON parent.comment_id = child.parent_comment_id
+            WHERE parent.user_id = #{userId}
+              AND child.user_id != parent.user_id
+        )
+    </select>
+    
+    <!-- 다수 댓글 삭제 -->
+    <delete id="deleteCommentsByPostIds" parameterType="list">
+        <if test="list != null and !list.isEmpty()">
+            DELETE FROM Comments
+            WHERE post_id IN
+            <foreach item="postId" collection="list" open="(" separator="," close=")">
+                #{postId}
+            </foreach>
+        </if>
+    </delete>
+
 </mapper>

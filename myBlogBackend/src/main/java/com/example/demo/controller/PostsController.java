@@ -1,8 +1,10 @@
 package com.example.demo.controller;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.domain.post.Post;
@@ -20,11 +23,12 @@ import com.example.demo.dto.post.PostQueryParams;
 import com.example.demo.service.PostService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
-
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 
 @RestController //컨트롤러가 HTTP 요청을 처리하고, 자바 객체를 HTTP 응답 본문으로 직접 반환하도록 합니다.
 /*
@@ -79,7 +83,7 @@ public class PostsController {
     }
 
     // 게시물 삭제 (DELETE)
-    @Operation(summary = "게시물 삭제", description = "특정 ID를 가진 게시물을 삭제합니다.")
+    @Operation(summary = "4. 게시물 삭제", description = "특정 ID를 가진 게시물을 삭제합니다.")
     @ApiResponse(responseCode = "204", description = "게시물 삭제 성공")
     @ApiResponse(responseCode = "404", description = "삭제할 게시물을 찾을 수 없음")
     @DeleteMapping("/{postId}")
@@ -176,5 +180,79 @@ public class PostsController {
         List<Post> posts = postsService.getPosts(queryParams);
         return new ResponseEntity<>(posts, HttpStatus.OK);
     }
+    
+    // 특정 게시물의 조회수 증가
+    @Operation(summary = "1. 게시물 조회수 증가", description = "특정 게시물의 조회수를 1 증가시킵니다.")
+    @ApiResponse(responseCode = "200", description = "조회수 증가 성공")
+    @PostMapping("/{postId}/increment-view-count")
+    public ResponseEntity<Void> incrementViewCount(@PathVariable(name="postId") Long postId) {
+        boolean updated = postsService.incrementViewCount(postId);
+        return updated ? new ResponseEntity<>(HttpStatus.OK) 
+                       : new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+    
+    
+    // 게시물의 상태에 따른 카테고리 변경
+    @Operation(summary = "3. 게시물 카테고리 변경", description = "draft 상태의 게시물을 '임시 저장' 카테고리로 이동합니다.")
+    @ApiResponse(responseCode = "200", description = "카테고리 변경 성공")
+    @PostMapping("/change-category-for-drafts")
+    public ResponseEntity<Void> changeCategoryForDrafts() {
+        postsService.changeCategoryForDrafts();
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+    
+    // 게시물 상태에 따른 게시물 삭제
+    @Operation(summary = "6. 특정 상태의 게시물 삭제", description = "주어진 상태('private', 'public', 'draft')의 모든 게시물을 삭제합니다.")
+    @ApiResponse(responseCode = "200", description = "게시물 삭제 성공", content = @Content(schema = @Schema(implementation = Void.class)))
+    @DeleteMapping("/status/{postStatus}")
+    public ResponseEntity<Void> deletePostsByStatus(
+            @Parameter(description = "삭제할 게시물의 상태", required = true, example = "private")
+            @PathVariable(name = "postStatus") String postStatus) {
+        postsService.deletePostsByStatus(postStatus);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+    
+    //8. 조회수가 낮은 게시물 삭제 – 조회수가 일정 수치 미만인 게시물 전체를 삭제합니다
+    @Operation(summary = "8. 조회수가 낮은 게시물 삭제", description = "조회수가 특정 임계값 미만인 게시물을 삭제합니다.")
+    @ApiResponse(responseCode = "200", description = "게시물 삭제 성공", content = @Content(schema = @Schema(implementation = Void.class)))
+    @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content)
+    @DeleteMapping("/low-views")
+    public ResponseEntity<Void> deletePostsWithLowViews(@RequestParam(name = "viewThreshold", required = true) int viewThreshold) {
+        postsService.deletePostsWithLowViews(viewThreshold);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+    
+    //9. 특정 날짜 이전에 작성된 게시물과 그 댓글 삭제
+    @Operation(summary = "9. 특정 날짜 이전에 작성된 게시물 및 댓글 삭제", description = "주어진 날짜 이전에 작성된 모든 게시물과 댓글을 삭제합니다.")
+    @ApiResponse(responseCode = "200", description = "게시물 및 댓글 삭제 성공", content = @Content(schema = @Schema(implementation = Void.class)))
+    @ApiResponse(responseCode = "400", description = "잘못된 요청 형식")
+    @DeleteMapping("/before-date")
+    public ResponseEntity<Void> deletePostsAndCommentsBeforeDate(
+        @Parameter(description = "기준 날짜 (yyyy-MM-dd 형식)", required = true, example = "2023-01-01")
+        @RequestParam (name = "date")@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        postsService.deletePostsAndCommentsBeforeDate(date);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+    
+    // 10. 다수의 게시물과 그 댓글 삭제
+    @Operation(summary = "10. 다수의 게시물 삭제", description = "배열 형식으로 제공된 게시물 ID에 해당하는 게시물들을 삭제합니다.")
+    @ApiResponse(responseCode = "200", description = "게시물 삭제 성공")
+    @DeleteMapping("/batch")
+    public ResponseEntity<Void> deleteMultiplePosts(
+        @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "삭제할 게시물의 ID 목록",
+            required = true,
+            content = @Content(
+                mediaType = "application/json",
+                array = @ArraySchema(schema = @Schema(implementation = Integer.class)),
+                examples = {
+                    @ExampleObject(name = "example", value = "[1, 2, 3]")
+                }
+            )
+        ) @RequestBody List<Integer> postIds) {
+        postsService.deleteMultiplePosts(postIds);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
 
 }

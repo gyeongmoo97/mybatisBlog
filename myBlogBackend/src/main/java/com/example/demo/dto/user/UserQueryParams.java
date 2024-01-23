@@ -1,8 +1,15 @@
 package com.example.demo.dto.user;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.List;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserQueryParams {
 
     @Schema(description = "정렬 기준이 될 필드 목록 (예: 'userId', 'createdAt')", example = "[\"userId\", \"createdAt\"]")

@@ -5,4 +5,19 @@
     <delete id="deletePostCategoriesByPost" parameterType="Long">
         DELETE FROM postcategories WHERE post_id = #{postId}
     </delete>
+    
+    <delete id="deletePostCategoriesByPostStatus">
+        DELETE FROM PostCategories WHERE post_id IN (SELECT post_id FROM Posts WHERE status = #{status})
+    </delete>
+    
+    <!-- 다수 게시물 카테고리 연관 데이터 삭제-->
+    <delete id="deletePostCategoriesByPostIds" parameterType="list">
+        <if test="list != null and !list.isEmpty()">
+            DELETE FROM PostCategories
+            WHERE post_id IN
+            <foreach item="postId" collection="list" open="(" separator="," close=")">
+                #{postId}
+            </foreach>
+        </if>
+    </delete>
 </mapper>

@@ -88,5 +88,64 @@
             OFFSET #{offset}
         </if>
     </select>
+    
+    <!-- 특정 게시물의 조회수 증가 -->
+    <update id="incrementViewCount">
+        UPDATE Posts
+        SET view_count = view_count + 1
+        WHERE post_id = #{postId}
+    </update>
 
+    <!-- 게시물의 상태에 따른 카테고리 변경 -->
+    <update id="changeCategoryForDrafts">
+        UPDATE PostCategories
+        SET category_id = (SELECT category_id FROM Categories WHERE name = '임시 저장')
+        WHERE post_id IN (SELECT post_id FROM Posts WHERE status = 'draft')
+    </update>
+    
+     <!-- 사용자가 작성한 게시물의 카테고리 삭제 -->
+    <delete id="deletePostCategoriesByUserId">
+        DELETE FROM PostCategories WHERE post_id IN (SELECT post_id FROM Posts WHERE user_id = #{userId})
+    </delete>
+
+    <!-- 사용자가 작성한 게시물 삭제 -->
+    <delete id="deletePostsByUserId">
+        DELETE FROM Posts WHERE user_id = #{userId}
+    </delete>
+    
+    <!-- 해당 상태의 게시물 삭제 -->
+    <delete id="deletePostsByStatus">
+        DELETE FROM Posts WHERE status = #{status}
+    </delete>
+
+    <!-- "postcategories" 테이블에서 게시물 참조 삭제 -->
+    <delete id="deletePostCategoriesByStatus">
+        DELETE FROM PostCategories WHERE post_id IN (SELECT post_id FROM Posts WHERE status = #{status})
+    </delete>
+    
+    <!-- 다수의 게시물 삭제 -->
+    <delete id="deleteMultiplePosts" parameterType="list">
+        <if test="list != null and !list.isEmpty()">
+            DELETE FROM Posts
+            WHERE post_id IN
+            <foreach item="postId" collection="list" open="(" separator="," close=")">
+                #{postId}
+            </foreach>
+        </if>
+    </delete>
+    
+    <!-- 조회수가 viewThreshold 미만인 게시물의 ID 조회 -->
+    <select id="findPostIdsWithViewsLessThan" resultType="java.lang.Integer">
+        SELECT post_id
+        FROM Posts
+        WHERE view_count <![CDATA[ < ]]>  #{viewThreshold}
+    </select>
+
+    <!-- 특정 날짜 이전에 작성된 게시물의 ID 조회 -->
+    <select id="findPostIdsBeforeDate" parameterType="java.time.LocalDate" resultType="java.lang.Integer">
+        SELECT post_id
+        FROM Posts
+        WHERE created_at  <![CDATA[ < ]]>  #{date}
+    </select>
+    
 </mapper>

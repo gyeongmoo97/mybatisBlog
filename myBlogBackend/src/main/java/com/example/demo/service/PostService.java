@@ -13,6 +13,7 @@ import com.example.demo.mapper.CommentMapper;
 import com.example.demo.mapper.PostCategoriesMapper;
 import com.example.demo.mapper.PostMapper;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -91,6 +92,60 @@ public class PostService {
     public List<Post> getPosts(PostQueryParams queryParams) {
         return postMapper.findPosts(queryParams);
     }
+    
+    // 특정 게시물의 조회수 증가
+    @Transactional
+    public boolean incrementViewCount(Long postId) {
+        return postMapper.incrementViewCount(postId) > 0;
+    }
+    
+    // 게시물의 상태에 따른 카테고리 변경
+    @Transactional
+    public void changeCategoryForDrafts() {
+        postMapper.changeCategoryForDrafts();
+    }
+    
+    // 비공개(private)' 상태의 게시물 삭제
+    @Transactional
+    public void deletePostsByStatus(String status) {
+        // 댓글 삭제
+        commentMapper.deleteCommentsByPostStatus(status);
+        // 게시물 카테고리 연관 데이터 삭제
+        postCategoriesMapper.deletePostCategoriesByPostStatus(status);
+        // 게시물 삭제
+        postMapper.deletePostsByStatus(status);
+    }
+    
+    //다수의 게시물 삭제
+    @Transactional
+    public void deleteMultiplePosts(List<Integer> postIds) {
+        // 댓글 삭제
+        commentMapper.deleteCommentsByPostIds(postIds);
+        // 게시물 카테고리 연관 데이터 삭제
+        postCategoriesMapper.deletePostCategoriesByPostIds(postIds);
+        // 게시물 삭제
+        postMapper.deleteMultiplePosts(postIds);
+    }
+    
+    // 조회수가 낮은 게시물 삭제
+    @Transactional
+    public void deletePostsWithLowViews(int viewThreshold) {
+        // 조회수가 viewThreshold 미만인 게시물의 ID 리스트 조회
+        List<Integer> postIds = postMapper.findPostIdsWithViewsLessThan(viewThreshold);
+        // 다수의 게시물 삭제 로직 재사용
+        deleteMultiplePosts(postIds);
+    }
+    
+    // 특정 날짜 이전에 작성된 게시물 및 댓글 삭제
+    @Transactional
+    public void deletePostsAndCommentsBeforeDate(LocalDate date) {
+        // 특정 날짜 이전에 작성된 게시물의 ID 리스트 조회
+        List<Integer> postIds = postMapper.findPostIdsBeforeDate(date);
+        // 다수의 게시물 삭제 로직 재사용
+        deleteMultiplePosts(postIds);
+    }
+    
+
 }
 
 

@@ -5,7 +5,7 @@ plugins {
 }
 
 compileJava {
-    options.compilerArgs.add('-parameters')
+    options.compilerArgs << '-parameters'
 }
 
 group = 'com.example'

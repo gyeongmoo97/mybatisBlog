@@ -47,6 +47,22 @@ public class UserService {
         return userMapper.findUsers(queryParams);
     }
     
+    // 특정 사용자 삭제
+    @Transactional
+    public boolean deleteUser(Long userId) {
+        // 사용자와 관련된 모든 댓글 삭제
+        commentMapper.deleteAllRelatedCommentsByUserId(userId);
+
+        // 사용자와 관련된 게시물의 카테고리 삭제
+        postMapper.deletePostCategoriesByUserId(userId);
+
+        // 사용자가 작성한 게시물 삭제
+        postMapper.deletePostsByUserId(userId);
+
+        // 사용자 프로필 삭제
+        return userMapper.deleteUser(userId) > 0;
+    }
+    
 }
 
 

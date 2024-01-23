@@ -12,5 +12,40 @@
         ORDER BY p.view_count DESC
         LIMIT 1
     </select>
+    
+    <!-- 특정 카테고리의 모든 게시물 상태 변경 -->
+    <update id="updateNoticePostsStatus">
+        UPDATE Posts
+        SET status = 'public'
+        WHERE post_id IN (
+            SELECT post_id
+            FROM PostCategories
+            WHERE category_id = (SELECT category_id FROM Categories WHERE name = '공지사항')
+        )
+    </update>
+
+    <!-- 카테고리와 관련된 게시물 카테고리 연관 데이터 삭제 -->
+    <delete id="deletePostCategoriesByCategoryId">
+        DELETE FROM PostCategories WHERE category_id = #{categoryId}
+    </delete>
+
+    <!-- 카테고리 삭제 -->
+    <delete id="deleteCategory">
+        DELETE FROM Categories WHERE category_id = #{categoryId}
+    </delete>
+    
+        <!-- 특정 카테고리의 게시물 삭제 -->
+    <delete id="deletePostsByCategoryId">
+        DELETE FROM Posts
+        WHERE post_id IN (SELECT post_id FROM PostCategories WHERE category_id = #{categoryId})
+    </delete>
+    
+        <!-- 특정 카테고리에 속한 게시물에 대한 댓글 삭제 -->
+    <delete id="deleteCommentsByCategoryId">
+        DELETE FROM Comments
+        WHERE post_id IN (SELECT post_id FROM PostCategories WHERE category_id = #{categoryId})
+    </delete>
+    
+
 
 </mapper>

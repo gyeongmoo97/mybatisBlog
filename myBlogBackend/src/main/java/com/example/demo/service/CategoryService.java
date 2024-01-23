@@ -39,6 +39,35 @@ public class CategoryService {
     public PostViewCount getTopViewedPostByCategory(Long categoryId) {
         return categoryMapper.findTopViewedPostByCategory(categoryId);
     }
+    
+    // 특정 카테고리의 모든 게시물 상태 변경
+    @Transactional
+    public void updateNoticePostsStatus() {
+        categoryMapper.updateNoticePostsStatus();
+    }
+    
+    // 특정 카테고리 삭제
+    @Transactional
+    public boolean deleteCategory(Long categoryId) {
+        // 카테고리와 관련된 게시물 카테고리 연관 데이터 삭제
+        categoryMapper.deletePostCategoriesByCategoryId(categoryId);
+
+        // 카테고리 삭제
+        return categoryMapper.deleteCategory(categoryId) > 0;
+    }
+    
+    // 특정 카테고리에 속한 게시물 삭제
+    @Transactional
+    public void deletePostsByCategory(Long categoryId) {
+        // 카테고리에 속한 게시물의 댓글 삭제
+        commentMapper.deleteCommentsByCategoryId(categoryId);
+
+        // 카테고리에 속한 게시물의 카테고리 연관 데이터 삭제
+        categoryMapper.deletePostCategoriesByCategoryId(categoryId);
+
+        // 카테고리에 속한 게시물 삭제
+        categoryMapper.deletePostsByCategoryId(categoryId);
+     }
 }
 
 

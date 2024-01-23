@@ -27,4 +27,9 @@
             OFFSET #{offset}
         </if>
     </select>
+    
+    <!-- 특정 사용자 삭제 -->
+    <delete id="deleteUser">
+        DELETE FROM UserProfile WHERE user_id = #{userId}
+    </delete>
 </mapper>

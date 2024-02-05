@@ -2,6 +2,7 @@ package com.example.demo.dto.post;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,6 +11,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class PostQueryParams {
 
     @Schema(description = "정렬 기준 필드 목록 (예: 'post_id', 'view_count')", example = "[\"post_id\", \"view_count\"]")

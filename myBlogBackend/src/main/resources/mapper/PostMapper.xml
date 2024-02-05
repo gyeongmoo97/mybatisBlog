@@ -10,9 +10,12 @@
         SELECT * FROM posts
     </select>
 
-    <insert id="createPost" parameterType="com.example.demo.domain.post.Post">
-        INSERT INTO posts (post_id, user_id, title, content, status, view_count) VALUES (#{postId},#{userId},#{title}, #{content}, #{status} , #{viewCount})
-    </insert>
+	<!-- useGeneratedKeys="true": MyBatis가 자동 생성된 키(여기서는 post_id)를 사용하도록 설정합니다. -->
+	<!-- keyProperty="postId": 자동 생성된 키가 Post 객체의 postId 속성에 설정되도록 지정합니다. -->
+    <insert id="createPost" parameterType="com.example.demo.domain.post.Post" useGeneratedKeys="true" keyProperty="postId">
+	    INSERT INTO posts (user_id, title, content, status, view_count)
+	    VALUES (#{userId}, #{title}, #{content}, #{status}, #{viewCount})
+	</insert>
 
     <update id="updatePost" parameterType="com.example.demo.domain.post.Post">
         UPDATE posts SET title = #{title}, content = #{content} WHERE post_id = #{postId}
@@ -29,12 +32,14 @@
         WHERE status = 'public'
     </select>
     
-    <!-- 가장 많이 조회된 상위 5개 게시물 조회 -->
-    <select id="findTop5Posts" resultType="com.example.demo.domain.post.Post">
-        SELECT *
-        FROM Posts
-        ORDER BY view_count DESC
-        LIMIT 5
+    <!-- 가장 많이 조회된 상위 n개 게시물 조회 -->
+    <select id="findTopPosts" resultType="com.example.demo.domain.post.Post">
+	    SELECT p.*, COUNT(c.comment_id) AS comment_count
+	    FROM Posts p
+	    LEFT JOIN Comments c ON p.post_id = c.post_id
+	    GROUP BY p.post_id
+	    ORDER BY comment_count DESC
+	    LIMIT #{n}
     </select>
     
     <!-- 특정 카테고리에 속하는 게시물과 카테고리 이름 조회 -->

@@ -42,14 +42,15 @@ public class PostsController {
 	@Autowired 	//의존성 주입
     private PostService postsService;
 
-	 // 게시물 생성 (POST)
-    @Operation(summary = "새로운 게시물 생성", description = "새로운 게시물을 생성합니다.")
-    @ApiResponse(responseCode = "201", description = "게시물 생성 성공")
-    @PostMapping // http method 설정
-    public ResponseEntity<Post> createPost(@RequestBody Post post) {
-        	postsService.createPost(post);
-        return new ResponseEntity<>(HttpStatus.CREATED);
-    }
+	// 게시물 생성 (POST)
+	@Operation(summary = "새로운 게시물 생성", description = "새로운 게시물을 생성합니다.")
+	@ApiResponse(responseCode = "201", description = "게시물 생성 성공")
+	@PostMapping
+	public ResponseEntity<Post> createPost(@RequestBody Post post) {
+	    int postId = postsService.createPost(post);
+	    post.setPostId(postId); // 생성된 post_id 설정
+	    return new ResponseEntity<>(post, HttpStatus.CREATED);
+	}
 
 	// 게시물 조회 (GET)
     @Operation(summary = "게시물 조회", description = "특정 ID를 가진 게시물을 조회합니다.")
@@ -73,12 +74,12 @@ public class PostsController {
     @PutMapping("/{postId}")
     public ResponseEntity<Post> updatePost(@PathVariable(name="postId") Long postId, @RequestBody Post updatedPost) {
         int postUpdateCount = postsService.updatePost(postId, updatedPost);
-        if (postUpdateCount <= 0) {
-        	System.out.println("0개이하");
-        	return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } else {
+        if (postUpdateCount > 0) {
         	System.out.println("0개이상");
         	return new ResponseEntity<>(HttpStatus.OK);
+        } else {
+        	System.out.println("0개이하");
+        	return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
@@ -89,8 +90,8 @@ public class PostsController {
     @DeleteMapping("/{postId}")
     public ResponseEntity<Void> deletePost(@PathVariable(name="postId") Long postId) {
         int postDeleteCount= postsService.deletePost(postId);
-        if (postDeleteCount<= 0) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        if (postDeleteCount> 0) {
+            return new ResponseEntity<>(HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -111,14 +112,16 @@ public class PostsController {
     }
     
     
-    // 가장 많이 조회된 상위 5개 게시물 조회
-    @Operation(summary = "3. 인기 게시물 조회", description = "가장 많이 조회된 상위 5개 게시물을 조회합니다.")
+    //사용자가 지정한 수의 인기(댓글이 가장 많은) 게시물 조회
+    @Operation(summary = "인기 게시물 조회", description = "가장 많이 조회된 상위 N개 게시물을 조회합니다.")
     @ApiResponse(responseCode = "200", description = "게시물 조회 성공")
-    @GetMapping("/top5")
-    public ResponseEntity<List<Post>> getTop5Posts() {
-        List<Post> topPosts = postsService.getTop5Posts();
+    @GetMapping("/top")
+    public ResponseEntity<List<Post>> getTopPosts(@RequestParam(name="postCount", defaultValue = "5") int postCount) {
+    	List<Post> topPosts = postsService.getTopPosts(postCount);
         return new ResponseEntity<>(topPosts, HttpStatus.OK);
     }
+    
+
     
     // 특정 카테고리에 속하는 게시물 조회
     @Operation(summary = "4. 카테고리별 게시물 조회", description = "특정 카테고리에 속하는 모든 게시물을 조회합니다.")
@@ -252,6 +255,17 @@ public class PostsController {
         ) @RequestBody List<Integer> postIds) {
         postsService.deleteMultiplePosts(postIds);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+    
+    
+    // 가장 인기 있는 게시물 조회 
+    @Operation(summary = "가장 인기 있는 게시물 조회", description = "조회수와 댓글 수에 따라 각 postCount 개의 게시물을 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "게시물 조회 성공", content = @Content(schema = @Schema(implementation = Post.class)))
+    @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content)
+    @GetMapping("/top-popular")
+    public ResponseEntity<List<Post>> getTopPostsAndTopCommentedPosts(@RequestParam(name="postCount", defaultValue = "5") int postCount) {
+        List<Post> posts = postsService.getTopPostsAndTopCommentedPosts(postCount);
+        return new ResponseEntity<>(posts, HttpStatus.OK);
     }
 
 

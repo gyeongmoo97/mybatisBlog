@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import com.example.demo.domain.post.Post;
@@ -33,8 +34,8 @@ public interface PostMapper {
 	// 특정 사용자의 게시물 조회
     List<Post> findPostsByUserId(Integer userId);
 
-    // 가장 많이 조회된 상위 5개 게시물 조회
-    List<Post> findTop5Posts();
+    // 가장 많이 조회된 상위 n개 게시물 조회
+    List<Post> findTopPosts(@Param("n") int n);
     
     // 특정 카테고리에 속하는 게시물 조회
     List<Post> findPostsByCategory( Integer categoryId);

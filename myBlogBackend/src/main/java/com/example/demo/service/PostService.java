@@ -1,7 +1,5 @@
 package com.example.demo.service;
 
-
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,7 +12,12 @@ import com.example.demo.mapper.PostCategoriesMapper;
 import com.example.demo.mapper.PostMapper;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Service
 public class PostService {
@@ -40,7 +43,8 @@ public class PostService {
 
     // 게시물 생성 메서드
     public int createPost(Post post) {
-        return postMapper.createPost(post);
+        postMapper.createPost(post);
+        return post.getPostId(); // MyBatis가 생성한 post_id 반환
     }
 
     // 게시물 수정 메서드
@@ -55,7 +59,6 @@ public class PostService {
     	commentMapper.deleteCommentsByPost(postId);
     	postCategoriesMapper.deletePostCategoriesByPost(postId);
         return postMapper.deletePost(postId);
-
     }
     
     // 공개된 모든 게시물 조회
@@ -63,9 +66,9 @@ public class PostService {
         return postMapper.findAllPublicPosts();
     }
     
-    // 가장 많이 조회된 상위 5개 게시물 조회
-    public List<Post> getTop5Posts() {
-        return postMapper.findTop5Posts();
+    // 가장 많이 댓글이 달린 상위 n개 게시물 조회
+    public List<Post> getTopPosts(int postCount) {
+        return postMapper.findTopPosts(postCount);
     }
     
     // 특정 카테고리에 속하는 게시물 조회
@@ -145,6 +148,41 @@ public class PostService {
         deleteMultiplePosts(postIds);
     }
     
+    // 인기 게시물 조회
+    public List<Post> getTopPostsAndTopCommentedPosts(int postCount) {
+
+        // 조회 파라미터 초기화
+        List<String> sort = new ArrayList<>();
+        sort.add("view_count");
+        List<String> order = new ArrayList<>();
+        order.add("desc"); // 여기를 수정했습니다.
+        PostQueryParams queryParams = PostQueryParams.builder()
+            .sort(sort)
+            .order(order)
+            .page((long) postCount * 2)
+            .offset((long) 0)
+            .build();
+
+        // 조회수가 높은 상위 게시물 조회
+        List<Post> topViewedPosts = getTopPosts(postCount * 2);
+        // 댓글이 많은 상위 게시물 조회
+        List<Post> topCommentedPosts = getPosts(queryParams);
+
+        // 중복 제거 및 최대 postCount개씩만 남기기
+        Map<Integer, Post> combinedPosts = new LinkedHashMap<>();
+        for (Post post : topViewedPosts) {
+            if (combinedPosts.size() < postCount) {
+                combinedPosts.put(post.getPostId(), post);
+            }
+        }
+        for (Post post : topCommentedPosts) {
+            if (combinedPosts.size() < postCount * 2 && !combinedPosts.containsKey(post.getPostId())) {
+                combinedPosts.put(post.getPostId(), post);
+            }
+        }
+
+        return new ArrayList<>(combinedPosts.values());
+    }
 
 }
 

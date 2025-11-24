@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node update-index.js:*)",
+      "Bash(lsof:*)",
+      "Bash(curl:*)",
+      "Bash(kill:*)",
+      "Bash(pkill:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

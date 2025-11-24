@@ -4,13 +4,35 @@ import { Home, Create, AccountCircle, Mail, Instagram, Twitter, LinkedIn, Facebo
 import { AppBar, BottomNavigation, BottomNavigationAction, Button, Card, CardActionArea, CardContent, CardMedia, Chip, Container, Grid, IconButton, Link, Menu, Toolbar, Typography } from '@mui/material';
 import { Box } from '@mui/system';
 import { Menu as MenuIcon } from '@mui/icons-material';
+import axiosInstance from '../api/axiosInstance';
+import { POST_API } from '../api/endpoints';
 
 function BlogHome() {
 
   const router = useRouter(); // useRouter 훅을 사용하여 router 객체를 생성합니다.
 
   const [value, setValue] = React.useState(0);
-  const posts = [
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // API에서 게시물 리스트 가져오기
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        setLoading(true);
+        const response = await axiosInstance.get(`${POST_API}/public`);
+        setPosts(response.data);
+      } catch (error) {
+        console.error('게시물을 불러오는데 실패했습니다:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPosts();
+  }, []);
+
+  const staticPosts = [
     {
       id: 1,
       title: '호주의 울룰루',
@@ -154,7 +176,7 @@ function BlogHome() {
 
   // board/[id] 경로로 라우팅합니다.
   const handlePostClick = (post) => {
-    router.push(`/board/${post.id}`);
+    router.push(`/board/${post.postId}`);
   };
 
   // 새 글 작성 페이지로 이동하는 함수
@@ -192,34 +214,52 @@ function BlogHome() {
 
     <div style={{ paddingTop: appBarHeight,  paddingBottom: appBarHeight }}>
       <Container>
-        <Grid container spacing={3}>
-          {posts.map(post => (
-            <Grid item xs={12} sm={6} md={4} lg={3} key={post.id}>
-              <CardActionArea onClick={() => handlePostClick(post)}>
-                <Card sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                  <CardMedia
-                    component="img"
-                    alt="미리보기 이미지"
-                    height="140"
-                    image={post.imageUrl}
-                    sx={{ objectFit: 'cover' }} // 이미지가 카드 크기에 맞게 채워지도록 조정합니다.
-                  />
-                  <Box flexGrow={1} display="flex" flexDirection="column">
-                    <CardContent sx={{ flexGrow: 1 }}>
-                      <Typography gutterBottom variant="h5" component="h2">{post.title}</Typography>
-                      <Typography variant="body2" color="textSecondary" component="p">{post.content}</Typography>
-                    </CardContent>
-                    <Box p={1} display="flex" justifyContent="flex-start" flexWrap="wrap">
-                      {post.categories.map(category => (
-                        <Chip label={category} key={category} sx={{ m: 0.5 }} />
-                      ))}
+        {loading ? (
+          <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+            <Typography variant="h6">게시물을 불러오는 중...</Typography>
+          </Box>
+        ) : posts.length === 0 ? (
+          <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+            <Typography variant="h6">게시물이 없습니다.</Typography>
+          </Box>
+        ) : (
+          <Grid container spacing={3}>
+            {posts.map(post => (
+              <Grid item xs={12} sm={6} md={4} lg={3} key={post.postId}>
+                <CardActionArea onClick={() => handlePostClick(post)}>
+                  <Card sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                    {post.imageUrl && (
+                      <CardMedia
+                        component="img"
+                        alt="미리보기 이미지"
+                        height="140"
+                        image={post.imageUrl}
+                        sx={{ objectFit: 'cover' }}
+                      />
+                    )}
+                    <Box flexGrow={1} display="flex" flexDirection="column">
+                      <CardContent sx={{ flexGrow: 1 }}>
+                        <Typography gutterBottom variant="h5" component="h2">{post.title}</Typography>
+                        <Typography variant="body2" color="textSecondary" component="p">
+                          {post.content ? post.content.substring(0, 100) : ''}
+                          {post.content && post.content.length > 100 ? '...' : ''}
+                        </Typography>
+                        <Typography variant="caption" color="textSecondary" sx={{ mt: 1 }}>
+                          조회수: {post.viewCount || 0}
+                        </Typography>
+                      </CardContent>
+                      <Box p={1} display="flex" justifyContent="flex-start" flexWrap="wrap">
+                        {post.categoryName && (
+                          <Chip label={post.categoryName} sx={{ m: 0.5 }} />
+                        )}
+                      </Box>
                     </Box>
-                  </Box>
-                </Card>
-              </CardActionArea>
-            </Grid>
-          ))}
-        </Grid>
+                  </Card>
+                </CardActionArea>
+              </Grid>
+            ))}
+          </Grid>
+        )}
       </Container>
     </div>
 

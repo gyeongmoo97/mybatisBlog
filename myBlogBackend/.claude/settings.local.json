@@ -4,7 +4,9 @@
       "Bash(./gradlew bootRun)",
       "Bash(chmod:*)",
       "Bash(java:*)",
-      "Bash(lsof:*)"
+      "Bash(lsof:*)",
+      "Bash(./gradlew clean:*)",
+      "Bash(kill:*)"
     ],
     "deny": [],
     "ask": []

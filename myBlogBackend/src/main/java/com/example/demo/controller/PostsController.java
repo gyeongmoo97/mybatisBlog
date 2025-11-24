@@ -100,15 +100,10 @@ public class PostsController {
     // 공개된 모든 게시물 조회
     @Operation(summary = "1. 공개된 모든 게시물 조회", description = "사용자 ID에 해당하는 모든 게시물의 제목과 생성 날짜를 조회합니다.")
     @ApiResponse(responseCode = "200", description = "게시물 조회 성공")
-    @ApiResponse(responseCode = "404", description = "게시물을 찾을 수 없음")
     @GetMapping("/public")
     public ResponseEntity<List<Post>> getAllPublicPosts() {
         List<Post> publicPosts = postsService.getPublicPosts();
-        if (!publicPosts.isEmpty()) {
-            return new ResponseEntity<>(publicPosts, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        return new ResponseEntity<>(publicPosts, HttpStatus.OK);
     }
     
     

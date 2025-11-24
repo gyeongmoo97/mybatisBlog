@@ -12,8 +12,8 @@ public class MyConfiguration {
     public CorsFilter corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowCredentials(true);
-        config.addAllowedOrigin("http://localhost:3000"); // 특정 도메인 허용
+        config.setAllowCredentials(false);
+        config.addAllowedOrigin("*"); // 모든 도메인 허용
         config.addAllowedHeader("*"); // 모든 헤더 허용
         config.addAllowedMethod("*"); // 모든 HTTP 메소드 허용
         source.registerCorsConfiguration("/**", config);

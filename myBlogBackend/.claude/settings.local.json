@@ -3,7 +3,8 @@
     "allow": [
       "Bash(./gradlew bootRun)",
       "Bash(chmod:*)",
-      "Bash(java:*)"
+      "Bash(java:*)",
+      "Bash(lsof:*)"
     ],
     "deny": [],
     "ask": []

@@ -20,7 +20,7 @@ function BlogHome() {
     const fetchPosts = async () => {
       try {
         setLoading(true);
-        const response = await axiosInstance.get(`${POST_API}/public`);
+        const response = await axiosInstance.get(POST_API);
         setPosts(response.data);
       } catch (error) {
         console.error('게시물을 불러오는데 실패했습니다:', error);

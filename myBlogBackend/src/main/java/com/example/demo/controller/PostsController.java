@@ -97,6 +97,15 @@ public class PostsController {
         }
     }
     
+    // 모든 게시물 조회
+    @Operation(summary = "모든 게시물 조회", description = "모든 게시물을 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "게시물 조회 성공")
+    @GetMapping
+    public ResponseEntity<List<Post>> getAllPosts() {
+        List<Post> posts = postsService.getAllPosts();
+        return new ResponseEntity<>(posts, HttpStatus.OK);
+    }
+
     // 공개된 모든 게시물 조회
     @Operation(summary = "1. 공개된 모든 게시물 조회", description = "사용자 ID에 해당하는 모든 게시물의 제목과 생성 날짜를 조회합니다.")
     @ApiResponse(responseCode = "200", description = "게시물 조회 성공")
